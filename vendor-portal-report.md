@@ -50,37 +50,36 @@ The JMeter aggregate results show the following key metrics across endpoints:
 
 ### Performance Visualization
 
-```mermaid
-graph TB
-    subgraph "Response Time Analysis (650 Concurrent Users)"
-        A[Purchase Order Acknowledgement<br/>Avg: 6496ms] 
-        B[Dispatch Purchase Order<br/>Avg: 7903ms]
-        C[Fetch Invoice Details<br/>Avg: 352ms]
-        D[Fetch Vendor Details<br/>Avg: 270ms]
-        E[Fetch PO Details<br/>Avg: 231ms]
-        F[Fetch Dispatch Details<br/>Avg: 214ms]
-    end
-    
-    style A fill:#ff6b6b
-    style B fill:#ff6b6b
-    style C fill:#ffd93d
-    style D fill:#6bcf7f
-    style E fill:#6bcf7f
-    style F fill:#6bcf7f
-```
+#### Response Time Analysis (650 Concurrent Users)
 
 ```mermaid
-graph LR
-    subgraph "Throughput Performance (req/sec)"
-        A[Purchase Order Ack: 11.6]
-        B[Fetch PO Details: 11.1]
-        C[Fetch Vendor: 11.0]
-        D[Fetch Dispatch: 11.0]
-        E[Dispatch PO: 11.0]
-        F[Fetch Invoice: 10.4]
-    end
+flowchart TB
+    A[Purchase Order Acknowledgement - Avg: 6496ms] 
+    B[Dispatch Purchase Order - Avg: 7903ms]
+    C[Fetch Invoice Details - Avg: 352ms]
+    D[Fetch Vendor Details - Avg: 270ms]
+    E[Fetch PO Details - Avg: 231ms]
+    F[Fetch Dispatch Details - Avg: 214ms]
     
-    G[Combined Throughput<br/>~66 req/sec total]
+    style A fill:#ff6b6b,stroke:#333,stroke-width:2px
+    style B fill:#ff6b6b,stroke:#333,stroke-width:2px
+    style C fill:#ffd93d,stroke:#333,stroke-width:2px
+    style D fill:#6bcf7f,stroke:#333,stroke-width:2px
+    style E fill:#6bcf7f,stroke:#333,stroke-width:2px
+    style F fill:#6bcf7f,stroke:#333,stroke-width:2px
+```
+
+#### Throughput Performance
+
+```mermaid
+flowchart LR
+    A[Purchase Order Ack: 11.6 req/s]
+    B[Fetch PO Details: 11.1 req/s]
+    C[Fetch Vendor: 11.0 req/s]
+    D[Fetch Dispatch: 11.0 req/s]
+    E[Dispatch PO: 11.0 req/s]
+    F[Fetch Invoice: 10.4 req/s]
+    G[Combined Throughput: 66 req/s total]
     
     A --> G
     B --> G
@@ -89,37 +88,34 @@ graph LR
     E --> G
     F --> G
     
-    style G fill:#4ecdc4
+    style G fill:#4ecdc4,stroke:#333,stroke-width:3px
 ```
 
+#### Current System Architecture
+
 ```mermaid
-graph TD
-    subgraph "Current System Architecture"
-        A[Single Server<br/>8 CPU Cores<br/>32GB RAM]
-        B[Spring Boot Application<br/>JVM Heap + GC]
-        C[MySQL Database<br/>InnoDB Buffer Pool]
-        
-        A --> B
-        A --> C
-        
-        D[Resource Contention]
-        B -.-> D
-        C -.-> D
-    end
+flowchart TD
+    A[Single Server - 8 CPU Cores - 32GB RAM]
+    B[Spring Boot Application - JVM Heap + GC]
+    C[MySQL Database - InnoDB Buffer Pool]
+    D[Resource Contention]
+    E[CPU: 500% Utilization - 5/8 cores saturated]
+    F[Memory Pressure - Shared 32GB]
+    G[Performance Degradation - High response times]
     
-    E[CPU: 500% Utilization<br/>5/8 cores saturated]
-    F[Memory Pressure<br/>Shared 32GB]
-    G[Performance Degradation<br/>High response times]
-    
+    A --> B
+    A --> C
+    B -.-> D
+    C -.-> D
     D --> E
     D --> F
     E --> G
     F --> G
     
-    style D fill:#ff6b6b
-    style E fill:#ff6b6b
-    style F fill:#ffd93d
-    style G fill:#ff6b6b
+    style D fill:#ff6b6b,stroke:#333,stroke-width:2px
+    style E fill:#ff6b6b,stroke:#333,stroke-width:2px
+    style F fill:#ffd93d,stroke:#333,stroke-width:2px
+    style G fill:#ff6b6b,stroke:#333,stroke-width:2px
 ```
 
 ---
