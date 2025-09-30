@@ -54,32 +54,37 @@ The JMeter aggregate results show the following key metrics across endpoints:
 
 ```mermaid
 flowchart TB
-    A[Purchase Order Acknowledgement - Avg: 6496ms] 
-    B[Dispatch Purchase Order - Avg: 7903ms]
-    C[Fetch Invoice Details - Avg: 352ms]
-    D[Fetch Vendor Details - Avg: 270ms]
-    E[Fetch PO Details - Avg: 231ms]
-    F[Fetch Dispatch Details - Avg: 214ms]
+    A["Purchase Order Acknowledgement<br/>Avg: 6496ms"] 
+    B["Dispatch Purchase Order<br/>Avg: 7903ms"]
+    C["Fetch Invoice Details<br/>Avg: 352ms"]
+    D["Fetch Vendor Details<br/>Avg: 270ms"]
+    E["Fetch PO Details<br/>Avg: 231ms"]
+    F["Fetch Dispatch Details<br/>Avg: 214ms"]
     
-    style A fill:#ff6b6b,stroke:#333,stroke-width:2px
-    style B fill:#ff6b6b,stroke:#333,stroke-width:2px
-    style C fill:#ffd93d,stroke:#333,stroke-width:2px
-    style D fill:#6bcf7f,stroke:#333,stroke-width:2px
-    style E fill:#6bcf7f,stroke:#333,stroke-width:2px
-    style F fill:#6bcf7f,stroke:#333,stroke-width:2px
+    style A fill:#ff6b6b
+    style B fill:#ff6b6b
+    style C fill:#ffd93d
+    style D fill:#6bcf7f
+    style E fill:#6bcf7f
+    style F fill:#6bcf7f
 ```
+
+**Response Time Summary:**
+- 🔴 High Response Time (>6000ms): Purchase Order Acknowledgement, Dispatch Purchase Order
+- 🟡 Medium Response Time (300-400ms): Fetch Invoice Details
+- 🟢 Low Response Time (<300ms): Fetch operations (Vendor, PO, Dispatch)
 
 #### Throughput Performance
 
 ```mermaid
 flowchart LR
-    A[Purchase Order Ack: 11.6 req/s]
-    B[Fetch PO Details: 11.1 req/s]
-    C[Fetch Vendor: 11.0 req/s]
-    D[Fetch Dispatch: 11.0 req/s]
-    E[Dispatch PO: 11.0 req/s]
-    F[Fetch Invoice: 10.4 req/s]
-    G[Combined Throughput: 66 req/s total]
+    A["Purchase Order Ack<br/>11.6 req/s"]
+    B["Fetch PO Details<br/>11.1 req/s"]
+    C["Fetch Vendor<br/>11.0 req/s"]
+    D["Fetch Dispatch<br/>11.0 req/s"]
+    E["Dispatch PO<br/>11.0 req/s"]
+    F["Fetch Invoice<br/>10.4 req/s"]
+    G["Combined Throughput<br/>66 req/s total"]
     
     A --> G
     B --> G
@@ -88,20 +93,25 @@ flowchart LR
     E --> G
     F --> G
     
-    style G fill:#4ecdc4,stroke:#333,stroke-width:3px
+    style G fill:#4ecdc4
 ```
+
+**Throughput Analysis:**
+- Individual endpoint throughput: 10.4 - 11.6 req/sec
+- Combined system throughput: ~66 req/sec
+- Bottleneck: CPU saturation limiting request processing
 
 #### Current System Architecture
 
 ```mermaid
 flowchart TD
-    A[Single Server - 8 CPU Cores - 32GB RAM]
-    B[Spring Boot Application - JVM Heap + GC]
-    C[MySQL Database - InnoDB Buffer Pool]
-    D[Resource Contention]
-    E[CPU: 500% Utilization - 5/8 cores saturated]
-    F[Memory Pressure - Shared 32GB]
-    G[Performance Degradation - High response times]
+    A["Single Server<br/>8 CPU Cores<br/>32GB RAM"]
+    B["Spring Boot Application<br/>JVM Heap + GC"]
+    C["MySQL Database<br/>InnoDB Buffer Pool"]
+    D["Resource Contention"]
+    E["CPU: 500% Utilization<br/>5/8 cores saturated"]
+    F["Memory Pressure<br/>Shared 32GB"]
+    G["Performance Degradation<br/>High response times"]
     
     A --> B
     A --> C
@@ -112,11 +122,17 @@ flowchart TD
     E --> G
     F --> G
     
-    style D fill:#ff6b6b,stroke:#333,stroke-width:2px
-    style E fill:#ff6b6b,stroke:#333,stroke-width:2px
-    style F fill:#ffd93d,stroke:#333,stroke-width:2px
-    style G fill:#ff6b6b,stroke:#333,stroke-width:2px
+    style D fill:#ff6b6b
+    style E fill:#ff6b6b
+    style F fill:#ffd93d
+    style G fill:#ff6b6b
 ```
+
+**Architecture Issues:**
+- ❌ Single server hosting both application and database
+- ❌ Resource contention between JVM and MySQL
+- ❌ CPU utilization at 500% (5 out of 8 cores saturated)
+- ⚠️ Memory pressure from shared 32GB RAM
 
 ---
 
@@ -153,41 +169,39 @@ To handle 2000-3000 concurrent users effectively, the following separated config
 ### Proposed Architecture
 
 ```mermaid
-graph TB
-    subgraph "Recommended Separated Architecture"
-        subgraph "Application Server"
-            A1[Spring Boot Application<br/>32 CPU Cores<br/>64GB RAM]
-            A2[JVM Heap: 32-48GB]
-            A3[Connection Pool: 500]
-            A1 --> A2
-            A1 --> A3
-        end
-        
-        subgraph "Database Server"
-            D1[MySQL Database<br/>8-12 CPU Cores<br/>48-64GB RAM]
-            D2[InnoDB Buffer Pool: 32GB]
-            D3[Max Connections: 500]
-            D1 --> D2
-            D1 --> D3
-        end
-        
-        subgraph "Storage Layer"
-            S1[NVMe SSD]
-            S2[RAID 10]
-            S1 --> S2
-        end
-        
-        A3 -.10 Gbps Network.-> D3
-        D1 --> S2
-    end
+flowchart TB
+    U["2000-3000 Concurrent Users"]
     
-    U[2000-3000 Concurrent Users]
+    A1["Application Server<br/>Spring Boot<br/>32 CPU Cores<br/>64GB RAM"]
+    A2["JVM Heap: 32-48GB"]
+    A3["Connection Pool: 500"]
+    
+    D1["Database Server<br/>MySQL<br/>8-12 CPU Cores<br/>48-64GB RAM"]
+    D2["InnoDB Buffer Pool: 32GB"]
+    D3["Max Connections: 500"]
+    
+    S1["Storage Layer<br/>NVMe SSD<br/>RAID 10"]
+    
     U --> A1
+    A1 --> A2
+    A1 --> A3
+    A3 -->|"10 Gbps Network"| D3
+    D1 --> D2
+    D1 --> D3
+    D1 --> S1
     
     style A1 fill:#6bcf7f
     style D1 fill:#6bcf7f
-    style S2 fill:#4ecdc4
+    style S1 fill:#4ecdc4
 ```
+
+**Recommended Architecture Benefits:**
+- ✅ Separated application and database servers
+- ✅ 4x CPU cores for application server (32 vs 8)
+- ✅ 2x RAM per server (64GB + 48-64GB vs shared 32GB)
+- ✅ Dedicated resources eliminate contention
+- ✅ High-speed network (10 Gbps) between servers
+- ✅ NVMe SSD with RAID 10 for reliability and performance
 
 ---
 
@@ -231,25 +245,14 @@ With 12,000 active users, peaks could reach 2000-3000 concurrent users (16-25% c
 ### Scaling Comparison Chart
 
 ```mermaid
-flowchart TD
-    subgraph Current["Current Capacity @ 650 Threads"]
-        C1["CPU: 500% utilization<br/>5 out of 8 cores"]
-        C2["Throughput: 66 req/sec"]
-        C3["Response Time: 2000-8000ms"]
-        C4["Error Rate: 5-6%"]
-    end
+flowchart LR
+    A["Current System<br/>650 Threads<br/>8 Cores<br/>32GB RAM<br/>66 req/s"]
+    B["Required System<br/>2000-3000 Threads<br/>32+ Cores<br/>112+ GB RAM<br/>400-600 req/s"]
     
-    subgraph Required["Required Capacity @ 2000-3000 Threads"]
-        R1["CPU: 32 cores<br/>Application Server"]
-        R2["Throughput: 400-600 req/sec"]
-        R3["Response Time: < 500ms"]
-        R4["Error Rate: < 1%"]
-    end
+    A -->|"Scale 3-4.6x"| B
     
-    Current -->|Scale 3-4.6x| Required
-    
-    style Current fill:#ff6b6b,color:#fff
-    style Required fill:#6bcf7f,color:#000
+    style A fill:#ff6b6b
+    style B fill:#6bcf7f
 ```
 
 **Scaling Requirements Summary:**
@@ -261,6 +264,17 @@ flowchart TD
 | RAM | 32 GB (shared) | 64 GB (app) + 48-64 GB (DB) | 3.5-4x |
 | Throughput | ~66 req/sec | 400-600 req/sec | 6-9x |
 | Response Time | 2000-8000 ms | < 500 ms | 4-16x improvement |
+| Error Rate | 5-6% | < 1% | 5-6x improvement |
+
+**Key Scaling Justifications:**
+
+1. **CPU Scaling (4-5x):** Current 500% CPU utilization (5/8 cores) at 650 threads indicates ~62.5 threads per core. For 2000-3000 threads, 32-40 cores needed with headroom.
+
+2. **Memory Scaling (3.5-4x):** Separated architecture eliminates contention. 64GB for JVM heap/cache + 48-64GB for InnoDB buffer pool enables efficient data caching.
+
+3. **Throughput Scaling (6-9x):** Current 66 req/sec must increase to 400-600 req/sec. Achieved through CPU scaling + separation + optimized connection pooling.
+
+4. **Response Time Improvement (4-16x):** Reduced from 2000-8000ms to <500ms through elimination of resource contention and CPU bottlenecks.
 
 ---
 
